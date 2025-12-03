@@ -1,0 +1,95 @@
+@startuml
+' Diagrama de Classes - Tarefas de Obrigacao e Agenda
+
+class Empresa {
+    +id
+    +nome
+    +cnpj_cpf
+    +ativo
+}
+
+class UsuarioEscritorio {
+    +id
+    +nome
+    +email
+    +telefone
+    +cargo
+    +ativo
+}
+
+class Departamento {
+    +id
+    +nome
+    +descricao
+}
+
+class TipoObrigacao {
+    +id
+    +nome
+    +descricao
+    +departamento_id
+    +tipo_imposto
+    +periodicidade
+    +ativo
+}
+
+class ModeloTarefaObrigacao {
+    +id
+    +nome
+    +descricao
+    +departamento_id
+    +tipo_obrigacao_id
+    +frequencia              ' mensal / trimestral / anual / eventual
+    +tipo_referencia_data    ' vencimento_guia / competencia / dia_fixo
+    +dia_fixo                ' opcional, ex: 20
+    +offset_dias             ' pode ser negativo para antecipar
+    +usar_dia_util           ' S/N
+    +concluir_automaticamente ' S/N
+    +gerar_multa             ' S/N
+    +cliente_pode_ver        ' S/N
+    +pontuacao_padrao
+    +ativo
+}
+
+class TarefaObrigacao {
+    +id
+    +empresa_id
+    +modelo_tarefa_id
+    +tipo_obrigacao_id
+    +competencia             ' ex: 2025-11
+    +data_meta_calculada
+    +data_conclusao
+    +status                  ' EM_ABERTO / CONCLUIDA / ATRASADA / CANCELADA
+    +responsavel_escritorio_id
+    +pontuacao
+    +observacoes
+}
+
+class HistoricoTarefaObrigacao {
+    +id
+    +tarefa_id
+    +status_anterior
+    +status_novo
+    +data_alteracao
+    +usuario_escritorio_id
+    +motivo
+}
+
+' Relacionamentos
+
+Departamento "1" -- "many" ModeloTarefaObrigacao : pertence >
+Departamento "1" -- "many" TipoObrigacao : agrupa >
+
+TipoObrigacao "1" -- "many" ModeloTarefaObrigacao : base_para >
+TipoObrigacao "1" -- "many" TarefaObrigacao : origem >
+
+Empresa "1" -- "many" TarefaObrigacao : possui >
+
+ModeloTarefaObrigacao "1" -- "many" TarefaObrigacao : gera >
+
+UsuarioEscritorio "1" -- "many" TarefaObrigacao : responsavel >
+UsuarioEscritorio "1" -- "many" HistoricoTarefaObrigacao : altera >
+
+TarefaObrigacao "1" -- "many" HistoricoTarefaObrigacao : historico >
+
+@enduml

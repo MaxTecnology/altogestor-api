@@ -1,0 +1,74 @@
+@startuml
+' C4 - Infraestrutura / Deploy alto nivel
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_LEFT_RIGHT()
+
+title C4 - Infraestrutura da Plataforma (Visao de Deploy Alto Nivel)
+
+Person(escritorio, "Colaborador do Escritorio", "Usa o painel web do escritorio.")
+Person(cliente, "Responsavel Financeiro", "Usa o portal web do cliente.")
+
+System_Boundary(cloud, "Ambiente em Nuvem") {
+
+    Container_Boundary(edge, "Camada de Entrada (Edge)") {
+        Container(reverseProxy, "Reverse Proxy / API Gateway", "Nginx ou similar", "Termina HTTPS, roteia requests para a API e para o frontend.")
+    }
+
+    Container_Boundary(appTier, "Camada de Aplicacao") {
+        Container(appBackend, "Backend de Aplicacao", "Aplicacao (ex: Laravel / Node / etc.)", "Expoe APIs para painel e portal. Implementa dominios de empresas, documentos, obrigacoes, guias, tarefas e pedidos.")
+        Container(workerJobs, "Worker / Scheduler", "Processo de filas e agendador", "Executa jobs assincronos: geracao periodica, notificacoes, processamento de documentos, conciliacao financeira, etc.")
+    }
+
+    Container_Boundary(dataTier, "Camada de Dados") {
+        ContainerDb(db, "Banco de Dados Principal", "BD Relacional (ex: MySQL / Postgres)", "Armazena dados de dominio, configuracoes e auditoria de negocio.")
+        Container(files, "Storage de Arquivos", "S3 / MinIO / Disco", "Armazena documentos enviados, comprovantes, PDFs de guias, relatorios, etc.")
+        Container(logs, "Storage de Logs / Observabilidade", "Log system (ex: ELK / Loki)", "Armazena logs tecnicos e auditoria de aplicacao.")
+    }
+
+    Container_Boundary(integration, "Servicos Externos") {
+        Container(notifService, "Servico de Notificacoes Externo", "API de Email / WhatsApp / SMS", "Envia mensagens para clientes e usuarios internos.")
+        ' Opcional: outros servicos externos (pagamentos, SEFAZ, etc.) podem ser adicionados aqui depois.
+    }
+}
+
+' Frontends (podem ser hospedados junto ao reverse proxy ou como static files)
+System_Boundary(frontend, "Frontends Web") {
+    Container(painel, "App Web - Painel do Escritorio", "SPA / Web", "Interface interna do escritorio (roda no browser).")
+    Container(portal, "App Web - Portal do Cliente", "SPA / Web", "Interface do cliente (roda no browser).")
+}
+
+' Usuarios -> Frontends
+Rel(escritorio, painel, "Usa via HTTPS (browser)")
+Rel(cliente, portal, "Usa via HTTPS (browser)")
+
+' Frontends -> Edge
+Rel(painel, reverseProxy, "HTTP(S) requests")
+Rel(portal, reverseProxy, "HTTP(S) requests")
+
+' Edge -> App
+Rel(reverseProxy, appBackend, "Roteia chamadas API", "HTTP interno")
+' Opcional: se SPA for servido pelo proprio reverseProxy, ele tambem entrega assets estaticos.
+
+' App -> Worker
+Rel(appBackend, workerJobs, "Envia tarefas assincronas\npara filas / agenda", "mensagens / fila")
+Rel(workerJobs, appBackend, "Chamada de APIs internas\nou atualizacoes de status", "HTTP interno")
+
+' App / Worker -> Banco
+Rel(appBackend, db, "R/W dados de dominio", "SQL")
+Rel(workerJobs, db, "R/W dados para jobs\n(geracao periodica, notificacoes, etc.)", "SQL")
+
+' App / Worker -> Storage de arquivos
+Rel(appBackend, files, "Upload/download de arquivos", "API / filesystem")
+Rel(workerJobs, files, "Processa arquivos,\nconverte, valida, etc.", "API / filesystem")
+
+' App / Worker -> Logs
+Rel(appBackend, logs, "Envia logs de aplicacao\n(e auditoria de eventos)", "Log agent / HTTP")
+Rel(workerJobs, logs, "Envia logs de jobs", "Log agent / HTTP")
+Rel(reverseProxy, logs, "Envia logs de acesso", "Log agent / HTTP")
+
+' App / Worker -> Servico externo de notificacoes
+Rel(appBackend, notifService, "Solicita envio de mensagens\npara clientes e usuarios internos", "HTTPS")
+Rel(workerJobs, notifService, "Dispara notificacoes agendadas\nou em lote", "HTTPS")
+
+@enduml

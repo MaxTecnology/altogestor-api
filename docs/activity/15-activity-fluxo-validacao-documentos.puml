@@ -1,0 +1,68 @@
+@startuml
+' Activity - Fluxo de Validacao de Documentos da Solicitacao
+
+start
+
+:'Responsavel do escritorio acessa o painel\n(e escolhe empresa / periodo / departamento)';
+
+:'Sistema lista SolicitacaoDocumento\ncom status PENDENTE, PARCIAL ou EM_VALIDACAO';
+
+:'Responsavel seleciona uma solicitacao\npara analisar';
+
+:'Painel carrega dados da solicitacao\n(periodo, modelo, empresa, status atual,\nlista de DocumentoEnviado)';
+
+if ("Existem documentos enviados\npara esta solicitacao?" ) then (Sim)
+    :'Responsavel abre cada documento\n(XML, PDF, relatorios, etc.)';
+
+    repeat
+        :'Responsavel analisa o documento atual\n(conteudo, empresa correta, periodo,\nquantidade, consistencia)';
+
+        if ("Documento esta legivel e\ncorreto para a finalidade?" ) then (Sim)
+            :'Responsavel marca este documento como\n"validado" (opcional, somente interno)';
+        else (Nao)
+            :'Responsavel identifica problema\n(ilegivel, incompleto, empresa errada, etc.)';
+
+            if ("Falha impede o uso total\ndos documentos?" ) then (Sim)
+                :'Responsavel decide classificar como\nINCOMPLETO ou RECUSADO';
+
+                if ("Cliente mandou documento errado\nou estrutura invalida?" ) then (Sim)
+                    :'SolicitacaoDocumento muda para RECUSADO';
+                    :'Sistema registra motivo detalhado\n(no historico de estados)';
+                    :'Sistema envia notificacao ao cliente\ninformando o motivo da recusa';
+                else (Nao)
+                    :'SolicitacaoDocumento muda para INCOMPLETO';
+                    :'Sistema registra quais itens\nestao faltando ou incorretos';
+                    :'Sistema envia notificacao ao cliente\nsolicitando documentos complementares';
+                endif
+
+                stop
+            else (Nao)
+                :'Responsavel apenas anota observacoes,\nmas segue avaliando demais documentos';
+            endif
+        endif
+
+    repeat while ("Ainda ha documentos\npara analisar?") is (Sim)
+
+    ' Checagem final, apos analisar todos os documentos
+    if ("Conjunto de documentos esta\nsuficiente para a apuracao?" ) then (Sim)
+        :'Responsavel conclui que a base\nesta suficiente';
+
+        :'SolicitacaoDocumento muda para COMPLETO';
+        :'Sistema registra mudanca de estado\nno HistoricoEstadoSolicitacao';
+        :'Opcional: sistema cria TarefaObrigacao\nou atualiza tarefa existente como pronta\npara apuracao';
+
+    else (Nao)
+        :'Responsavel entende que ainda faltam\ninformacoes ou arquivos importantes';
+        :'SolicitacaoDocumento muda para INCOMPLETO';
+        :'Sistema registra detalhes do que falta\n(campos livres ou checklist interno)';
+        :'Sistema envia notificacao ao cliente\ncom orientacao do que complementar';
+    endif
+
+else (Nao)
+    :'Nao ha documentos enviados ainda';
+    :'SolicitacaoDocumento permanece como PENDENTE';
+    :'Responsavel pode registrar observacao\nou apenas sair da tela';
+endif
+
+stop
+@enduml

@@ -1,0 +1,41 @@
+@startuml
+' Diagrama de Estados - Solicitacao de Documento
+
+state "PENDENTE" as PENDENTE
+state "PARCIAL" as PARCIAL
+state "EM_VALIDACAO" as EM_VALIDACAO
+state "INCOMPLETO" as INCOMPLETO
+state "RECUSADO" as RECUSADO
+state "COMPLETO" as COMPLETO
+state "EM_ATRASO" as EM_ATRASO
+state "NAO_ENTREGUE" as NAO_ENTREGUE
+state "CANCELADO" as CANCELADO
+
+' Entradas do cliente
+PENDENTE --> PARCIAL : Cliente envia algum documento
+PARCIAL --> EM_VALIDACAO : Todos documentos enviados\naguardando validacao
+PARCIAL --> EM_VALIDACAO : Escritorio inicia validacao
+EM_VALIDACAO --> COMPLETO : Documento validado\npor escritorio
+EM_VALIDACAO --> INCOMPLETO : Documento invalido ou corrompido
+EM_VALIDACAO --> RECUSADO : Documento nao aceito\n(motivo: incorreto ou incompleto)
+INCOMPLETO --> PARCIAL : Cliente reenviar documento\ncorreto
+RECUSADO --> PARCIAL : Cliente reenviar documento\ncorreto
+
+' Conclusao boa
+PARCIAL --> COMPLETO : Escritorio marca como suficiente\nou cliente envia tudo corretamente
+
+' Atraso e nao entrega
+PENDENTE --> EM_ATRASO : Data limite vencida
+PARCIAL --> EM_ATRASO : Data limite vencida
+EM_VALIDACAO --> EM_ATRASO : Data limite vencida\n(validacao nao concluida)
+EM_ATRASO --> NAO_ENTREGUE : Fechamento do periodo\nsem envio valido
+
+' Cancelamento administrativo
+PENDENTE --> CANCELADO : Escritorio cancela solicitacao
+PARCIAL --> CANCELADO : Escritorio cancela solicitacao
+EM_VALIDACAO --> CANCELADO : Escritorio cancela solicitacao
+EM_ATRASO --> CANCELADO : Escritorio cancela solicitacao
+INCOMPLETO --> CANCELADO : Escritorio cancela solicitacao
+RECUSADO --> CANCELADO : Escritorio cancela solicitacao
+
+@enduml

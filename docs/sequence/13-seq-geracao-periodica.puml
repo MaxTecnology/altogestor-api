@@ -1,0 +1,66 @@
+@startuml
+' Sequencia - Job de Geracao Periodica (obrigacoes, tarefas e solicitacoes)
+
+actor "Agendador do Sistema" as scheduler
+participant "Serv GeracaoPeriodica" as geracao
+database "BD Principal" as db
+participant "Serv Obrigacoes" as compObrigacoes
+participant "Serv ModelosDocs" as compModelosDocs
+participant "Serv Tarefas" as compTarefas
+participant "Serv ColetaDocs" as compColetaDocs
+participant "Serv EventosNotif" as compEventosNotif
+participant "Servico Logs" as logs
+
+== Disparo diario do job ==
+scheduler -> geracao : Executar job diario\n(ex: 02:00 da manha)
+
+' 1) Buscar configuracoes de obrigacoes por empresa
+geracao -> db : SELECT configuracoes_obrigacao_empresa\n+ tipos_obrigacao_ativos
+db --> geracao : lista configuracoes
+
+' 2) Para cada configuracao, calcular competencia e datas
+group Para cada configuracao de obrigacao
+    geracao -> geracao : Calcular proximo periodo\n(ex: competencia seguinte)\nCalcular data_vencimento e data_meta_tarefa
+
+    ' Verificar se ja existe guia/tarefa para aquele periodo
+    geracao -> db : Verificar existencia de guia/tarefa\npara empresa + obrigacao + competencia
+    db --> geracao : existe / nao existe
+
+    alt Nao existe ainda
+        ' Criar tarefa de obrigacao (agenda do escritorio)
+        geracao -> compTarefas : Criar TarefaObrigacao\n(empresa, tipo_obrigacao, competencia,\ndata_meta_calculada, responsavel)
+        compTarefas -> db : INSERT tarefa_obrigacao
+        db --> compTarefas : id_tarefa
+        compTarefas -> logs : registrar criacao tarefa_automatica
+
+        ' Opcional: criar solicitacoes de documentos base
+        geracao -> compModelosDocs : Consultar modelos de documentos\nligados a esta obrigacao/empresa
+        compModelosDocs -> db : SELECT modelos_documento
+        db --> compModelosDocs : lista modelos
+        compModelosDocs --> geracao : lista modelos
+
+        alt Existem modelos de documentos
+            geracao -> compColetaDocs : Criar SolicitacaoDocumento\npor modelo, empresa e periodo
+            compColetaDocs -> db : INSERT solicitacao_documento
+            db --> compColetaDocs : ids_solicitacoes
+            compColetaDocs -> logs : registrar criacao solicitacoes_automaticas
+
+            ' Gera eventos para lembretes futuros
+            compColetaDocs -> compEventosNotif : evento "solicitacao_criada_automaticamente"
+        else
+            ' Nenhuma solicitacao automatica para esta obrigacao
+        end
+
+        ' Registrar auditoria da geracao desta obrigacao
+        geracao -> logs : registrar geracao_periodica\n(empresa, obrigacao, competencia, id_tarefa)
+    else Ja existe
+        geracao -> logs : registrar que itens ja existiam\n(sem duplicar)
+    end
+end
+
+' 3) Opcional: disparar eventos de consolidacao para dashboard/calendario
+geracao -> compEventosNotif : evento "agenda_atualizada"
+
+geracao --> scheduler : Job finalizado com sucesso
+
+@enduml

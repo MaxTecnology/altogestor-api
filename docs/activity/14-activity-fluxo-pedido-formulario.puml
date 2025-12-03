@@ -1,0 +1,62 @@
+@startuml
+' Activity - Fluxo de Pedido do Cliente com Formulario Parametrizado
+
+start
+
+:'Cliente acessa o portal\n(escolhe empresa se tiver mais de uma)';
+
+:'Cliente abre menu de "Pedidos / Chamados"';
+
+:'Portal solicita lista de tipos de pedido\n(consulta ModeloPedido disponivel_portal = S)';
+
+:'Portal exibe lista de tipos de pedido\n(ex: Abertura empresa, Alteracao contrato,\nReemissao de guia, etc.)';
+
+:'Cliente escolhe um tipo de pedido\n(um ModeloPedido)';
+
+:'Portal consulta detalhes do modelo\n(ModeloPedidoCampo + ModeloPedidoDocumento)';
+
+:'Portal monta o formulario dinamicamente\ncom campos e documentos exigidos';
+
+repeat
+    :'Cliente preenche campos do formulario\n(dados digitados, selecoes, datas, etc.)';
+    :'Cliente anexa arquivos solicitados\n(PDF, imagens, etc.)';
+
+    if ("Todos campos obrigatorios\npreenchidos e arquivos exigidos anexados?" ) then (Sim)
+        break
+    else (Nao)
+        :'Portal exibe aviso de campos ou arquivos\nobrigatorios pendentes';
+    endif
+repeat while (Cliente continua editando?)
+
+:'Cliente clica em "Enviar pedido"';
+
+:'Portal envia dados para backend\n(criacao de PedidoCliente)';
+
+:'Backend cria registro PedidoCliente\n(status = ABERTO, origem = portal)';
+
+:'Backend grava respostas de campos\n(PedidoCampoResposta)';
+
+:'Backend grava documentos anexados\n(PedidoDocumentoEnviado)';
+
+:'Backend define responsavel interno\nconforme departamento do ModeloPedido\nou regra de distribuicao';
+
+:'Backend registra historico inicial\n(HistoricoPedidoCliente: status ABERTO)';
+
+:'Backend pode criar TarefaObrigacao ou\nTarefa interna vinculada ao pedido\n(conforme tipo de pedido)';
+
+:'Backend dispara evento para notificacao interna\n(aviso ao responsavel do escritorio)';
+
+if ("Alguma validacao falha no backend?" ) then (Sim)
+    :'Backend retorna erro ou inconsistencias\n(arquivo invalido, campo fora de regra)';
+    :'Portal exibe mensagem de erro\npara o cliente revisar';
+    stop
+else (Nao)
+    :'Backend retorna confirmacao de criacao do pedido';
+endif
+
+:'Portal exibe mensagem de sucesso\n("Seu pedido foi aberto", numero do protocolo)';
+
+:'Responsavel do escritorio visualiza o pedido\nno painel interno e segue fluxo de atendimento';
+
+stop
+@enduml

@@ -1,0 +1,150 @@
+@startuml
+' ER - Modulo de Pedidos do Cliente com Formularios Parametrizados
+
+entity "empresas" as empresas {
+  *id : bigint
+  --
+  nome : varchar
+  cnpj_cpf : varchar
+  ativo : bool
+}
+
+entity "departamentos" as departamentos {
+  *id : bigint
+  --
+  nome : varchar
+  descricao : varchar
+}
+
+entity "usuarios_escritorio" as usuarios_escritorio {
+  *id : bigint
+  --
+  nome : varchar
+  email : varchar
+  telefone : varchar
+  cargo : varchar
+  ativo : bool
+}
+
+entity "usuarios_cliente" as usuarios_cliente {
+  *id : bigint
+  --
+  nome : varchar
+  email : varchar
+  telefone : varchar
+  cargo : varchar
+  ativo : bool
+}
+
+' =========================
+' Modelos de pedido
+' =========================
+
+entity "modelos_pedidos" as modelos_pedidos {
+  *id : bigint
+  --
+  nome : varchar
+  descricao : varchar
+  departamento_id : bigint
+  disponivel_portal : bool
+  ativo : bool
+}
+
+entity "modelos_pedidos_campos" as modelos_pedidos_campos {
+  *id : bigint
+  --
+  modelo_pedido_id : bigint
+  nome_campo : varchar
+  tipo_campo : varchar         ' texto, numero, data, lista, cpf, cnpj etc
+  obrigatorio : bool
+  ordem : int
+  configuracao_extra : text    ' JSON (opcoes, mascara etc)
+}
+
+entity "modelos_pedidos_documentos" as modelos_pedidos_documentos {
+  *id : bigint
+  --
+  modelo_pedido_id : bigint
+  descricao : varchar
+  tipo_arquivo_permitido : varchar  ' pdf, imagem, qualquer
+  obrigatorio : bool
+  ordem : int
+}
+
+' =========================
+' Pedidos concretos
+' =========================
+
+entity "pedidos_clientes" as pedidos_clientes {
+  *id : bigint
+  --
+  empresa_id : bigint
+  modelo_pedido_id : bigint
+  usuario_cliente_id : bigint
+  usuario_escritorio_responsavel_id : bigint
+  data_abertura : datetime
+  data_fechamento : datetime
+  status : varchar        ' ABERTO, EM_ANALISE, AGUARDANDO_CLIENTE, CONCLUIDO, CANCELADO
+  prioridade : varchar    ' baixa, normal, alta
+  canal_origem : varchar  ' portal, email, telefone, interno
+  observacoes_internas : text
+}
+
+entity "pedidos_campos_respostas" as pedidos_campos_respostas {
+  *id : bigint
+  --
+  pedido_id : bigint
+  modelo_campo_id : bigint
+  valor_texto : text
+  valor_numero : decimal(18,2)
+  valor_data : datetime
+}
+
+entity "pedidos_documentos_enviados" as pedidos_documentos_enviados {
+  *id : bigint
+  --
+  pedido_id : bigint
+  modelo_documento_id : bigint
+  nome_arquivo : varchar
+  caminho_arquivo : varchar
+  data_envio : datetime
+  usuario_cliente_id : bigint
+}
+
+entity "historico_pedidos_clientes" as historico_pedidos_clientes {
+  *id : bigint
+  --
+  pedido_id : bigint
+  status_anterior : varchar
+  status_novo : varchar
+  data_alteracao : datetime
+  usuario_responsavel_id : bigint     ' usuarios_escritorio
+  motivo : text
+}
+
+' =========================
+' Relacionamentos
+' =========================
+
+departamentos ||--o{ modelos_pedidos : "1 N"
+
+modelos_pedidos ||--o{ modelos_pedidos_campos : "1 N"
+modelos_pedidos ||--o{ modelos_pedidos_documentos : "1 N"
+modelos_pedidos ||--o{ pedidos_clientes : "1 N"
+
+empresas ||--o{ pedidos_clientes : "1 N"
+
+usuarios_cliente ||--o{ pedidos_clientes : "abre"
+usuarios_escritorio ||--o{ pedidos_clientes : "responsavel"
+
+pedidos_clientes ||--o{ pedidos_campos_respostas : "1 N"
+modelos_pedidos_campos ||--o{ pedidos_campos_respostas : "1 N"
+
+pedidos_clientes ||--o{ pedidos_documentos_enviados : "1 N"
+modelos_pedidos_documentos ||--o{ pedidos_documentos_enviados : "1 N"
+usuarios_cliente ||--o{ pedidos_documentos_enviados : "envia"
+
+pedidos_clientes ||--o{ historico_pedidos_clientes : "1 N"
+usuarios_escritorio ||--o{ historico_pedidos_clientes : "altera"
+
+@enduml

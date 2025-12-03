@@ -1,0 +1,130 @@
+@startuml
+' Diagrama de Classes - Pedidos do Cliente com Formularios Parametrizados
+
+class Empresa {
+    +id
+    +nome
+    +cnpj_cpf
+    +ativo
+}
+
+class UsuarioCliente {
+    +id
+    +nome
+    +email
+    +telefone
+    +cargo
+    +ativo
+}
+
+class UsuarioEscritorio {
+    +id
+    +nome
+    +email
+    +telefone
+    +cargo
+    +ativo
+}
+
+class Departamento {
+    +id
+    +nome
+    +descricao
+}
+
+' ------- Modelos de pedido e formulario -------
+
+class ModeloPedido {
+    +id
+    +nome
+    +descricao
+    +departamento_id
+    +disponivel_portal      ' S/N - se aparece para o cliente escolher
+    +ativo
+}
+
+class ModeloPedidoCampo {
+    +id
+    +modelo_pedido_id
+    +nome_campo
+    +tipo_campo             ' texto / numero / data / lista / boolean / cpf / cnpj / email
+    +obrigatorio            ' S/N
+    +ordem
+    +configuracao_extra     ' JSON com opcoes, mascara etc.
+}
+
+class ModeloPedidoDocumento {
+    +id
+    +modelo_pedido_id
+    +descricao
+    +tipo_arquivo_permitido ' pdf / imagem / qualquer
+    +obrigatorio            ' S/N
+    +ordem
+}
+
+' ------- Pedido concreto do cliente -------
+
+class PedidoCliente {
+    +id
+    +empresa_id
+    +modelo_pedido_id
+    +usuario_cliente_id
+    +usuario_escritorio_responsavel_id
+    +data_abertura
+    +data_fechamento
+    +status                 ' ABERTO / EM_ANALISE / AGUARDANDO_CLIENTE / CONCLUIDO / CANCELADO
+    +prioridade             ' baixa / normal / alta
+    +canal_origem           ' portal / email / telefone / interno
+    +observacoes_internas
+}
+
+class PedidoCampoResposta {
+    +id
+    +pedido_id
+    +modelo_campo_id
+    +valor_texto
+    +valor_numero
+    +valor_data
+}
+
+class PedidoDocumentoEnviado {
+    +id
+    +pedido_id
+    +modelo_documento_id
+    +nome_arquivo
+    +caminho_arquivo
+    +data_envio
+    +usuario_cliente_id
+}
+
+class HistoricoPedidoCliente {
+    +id
+    +pedido_id
+    +status_anterior
+    +status_novo
+    +data_alteracao
+    +usuario_responsavel_id   ' UsuarioEscritorio
+    +motivo
+}
+
+' ------- Relacionamentos -------
+
+Departamento "1" -- "many" ModeloPedido : possui >
+
+ModeloPedido "1" -- "many" ModeloPedidoCampo : tem_campos >
+ModeloPedido "1" -- "many" ModeloPedidoDocumento : tem_docs >
+ModeloPedido "1" -- "many" PedidoCliente : origem >
+
+Empresa "1" -- "many" PedidoCliente : possui >
+
+UsuarioCliente "1" -- "many" PedidoCliente : abre >
+UsuarioCliente "1" -- "many" PedidoDocumentoEnviado : envia_docs >
+
+UsuarioEscritorio "1" -- "many" PedidoCliente : responsavel >
+UsuarioEscritorio "1" -- "many" HistoricoPedidoCliente : altera_status >
+
+PedidoCliente "1" -- "many" PedidoCampoResposta : respostas >
+PedidoCliente "1" -- "many" PedidoDocumentoEnviado : docs_enviados >
+PedidoCliente "1" -- "many" HistoricoPedidoCliente : historico >
+
+@enduml

@@ -1,0 +1,121 @@
+@startuml
+' Diagrama de Classes - Modulo de Obrigacoes e Guias (alinhado com documentos/usuarios)
+
+class Empresa {
+    +id
+    +nome
+    +cnpj_cpf
+    +ativo
+}
+
+class UsuarioEscritorio {
+    +id
+    +nome
+    +email
+    +telefone
+    +cargo
+    +ativo
+}
+
+class UsuarioCliente {
+    +id
+    +nome
+    +email
+    +telefone
+    +cargo
+    +ativo
+}
+
+class TipoObrigacao {
+    +id
+    +nome
+    +descricao
+    +departamento_id         ' fiscal, contabil, etc.
+    +tipo_imposto            ' DAS, IRPJ, CSLL, ISS, etc.
+    +periodicidade           ' mensal / trimestral / anual / eventual
+    +ativo
+}
+
+class ConfiguracaoObrigacaoEmpresa {
+    +id
+    +empresa_id
+    +tipo_obrigacao_id
+    +dia_limite_padrao
+    +responsavel_departamento_id   ' UsuarioEscritorio
+    +gera_guia_no_sistema          ' S/N
+    +observacoes
+    +ativo
+}
+
+class GuiaFiscal {
+    +id
+    +empresa_id
+    +tipo_obrigacao_id
+    +competencia              ' ex: 2025-10
+    +data_vencimento
+    +valor_principal
+    +valor_juros
+    +valor_multa
+    +valor_total
+    +status_guia              ' GERADA_INTERNA / DISPONIVEL_PORTAL / ENVIADA_CLIENTE / VISUALIZADA_CLIENTE / PAGA_NAO_CONFIRMADA / PAGA / ATRASADA / CANCELADA
+    +data_status
+    +usuario_responsavel_id   ' UsuarioEscritorio
+}
+
+class ComprovantePagamento {
+    +id
+    +guia_fiscal_id
+    +usuario_cliente_id
+    +data_envio
+    +nome_arquivo
+    +caminho_arquivo
+    +observacoes
+}
+
+class VinculoGuiaSolicitacaoDocumento {
+    +id
+    +guia_fiscal_id
+    +solicitacao_documento_id
+    +tipo_vinculo          ' base_para_apuracao / suporte / outro
+}
+
+' Mesmo conceito de log de envio usado no modulo de documentos
+class EnvioDocumentoCliente {
+    +id
+    +empresa_id
+    +usuario_escritorio_id
+    +usuario_cliente_id
+    +tipo_recurso          ' guia_fiscal
+    +recurso_id            ' guia_fiscal_id
+    +canal_envio           ' email / whatsapp / outro
+    +data_envio
+    +assunto
+    +mensagem_resumo
+    +status_envio          ' pendente / enviado / erro
+    +detalhe_status
+}
+
+' -------------------
+' Relacionamentos
+' -------------------
+
+Empresa "1" -- "many" ConfiguracaoObrigacaoEmpresa : configura >
+Empresa "1" -- "many" GuiaFiscal : possui >
+Empresa "1" -- "many" EnvioDocumentoCliente : envios >
+
+TipoObrigacao "1" -- "many" ConfiguracaoObrigacaoEmpresa : usado_por >
+TipoObrigacao "1" -- "many" GuiaFiscal : gera >
+
+ConfiguracaoObrigacaoEmpresa "1" -- "many" GuiaFiscal : orienta_geracao >
+
+GuiaFiscal "1" -- "many" ComprovantePagamento : comprovantes >
+GuiaFiscal "1" -- "many" VinculoGuiaSolicitacaoDocumento : vinculos >
+
+UsuarioEscritorio "1" -- "many" ConfiguracaoObrigacaoEmpresa : responsavel_departamento >
+UsuarioEscritorio "1" -- "many" GuiaFiscal : responsavel >
+UsuarioEscritorio "1" -- "many" EnvioDocumentoCliente : envia >
+
+UsuarioCliente "1" -- "many" ComprovantePagamento : anexa_comprovante >
+UsuarioCliente "1" -- "many" EnvioDocumentoCliente : destinatario >
+
+@enduml

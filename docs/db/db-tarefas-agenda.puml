@@ -1,0 +1,106 @@
+@startuml
+' ER - Modulo de Tarefas e Agenda (Modelos e Tarefas de Obrigacao)
+
+entity "empresas" as empresas {
+  *id : bigint
+  --
+  nome : varchar
+  cnpj_cpf : varchar
+  ativo : bool
+}
+
+entity "departamentos" as departamentos {
+  *id : bigint
+  --
+  nome : varchar
+  descricao : varchar
+}
+
+entity "usuarios_escritorio" as usuarios_escritorio {
+  *id : bigint
+  --
+  nome : varchar
+  email : varchar
+  telefone : varchar
+  cargo : varchar
+  ativo : bool
+}
+
+entity "tipos_obrigacoes" as tipos_obrigacoes {
+  *id : bigint
+  --
+  nome : varchar
+  departamento_id : bigint
+  periodicidade : varchar
+  ativo : bool
+}
+
+' =========================
+' Modelos de tarefa
+' =========================
+
+entity "modelos_tarefas_obrigacao" as modelos_tarefas_obrigacao {
+  *id : bigint
+  --
+  nome : varchar
+  descricao : varchar
+  departamento_id : bigint
+  tipo_obrigacao_id : bigint
+  frequencia : varchar          ' mensal, trimestral, anual, unica
+  tipo_referencia_data : varchar ' vencimento_guia, competencia, dia_fixo
+  dia_fixo : int
+  offset_dias : int
+  usar_dia_util : bool
+  concluir_automaticamente : bool
+  gerar_multa : bool
+  cliente_pode_ver : bool
+  pontuacao_padrao : int
+  ativo : bool
+}
+
+' =========================
+' Tarefas de obrigacao
+' =========================
+
+entity "tarefas_obrigacao" as tarefas_obrigacao {
+  *id : bigint
+  --
+  empresa_id : bigint
+  modelo_tarefa_id : bigint
+  tipo_obrigacao_id : bigint
+  competencia : varchar
+  data_meta_calculada : datetime
+  data_conclusao : datetime
+  status : varchar       ' EM_ABERTO, CONCLUIDA, ATRASADA, etc.
+  responsavel_escritorio_id : bigint
+  pontuacao : int
+  observacoes : text
+}
+
+entity "historico_tarefas_obrigacao" as historico_tarefas_obrigacao {
+  *id : bigint
+  --
+  tarefa_obrigacao_id : bigint
+  status_anterior : varchar
+  status_novo : varchar
+  data_alteracao : datetime
+  usuario_escritorio_id : bigint
+  motivo : text
+}
+
+' =========================
+' Relacionamentos
+' =========================
+
+departamentos ||--o{ modelos_tarefas_obrigacao : "1 N"
+tipos_obrigacoes ||--o{ modelos_tarefas_obrigacao : "1 N"
+
+empresas ||--o{ tarefas_obrigacao : "1 N"
+modelos_tarefas_obrigacao ||--o{ tarefas_obrigacao : "1 N"
+tipos_obrigacoes ||--o{ tarefas_obrigacao : "1 N"
+usuarios_escritorio ||--o{ tarefas_obrigacao : "responsavel"
+
+tarefas_obrigacao ||--o{ historico_tarefas_obrigacao : "1 N"
+usuarios_escritorio ||--o{ historico_tarefas_obrigacao : "altera"
+
+@enduml

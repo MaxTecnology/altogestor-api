@@ -1,0 +1,33 @@
+@startuml
+' Diagrama de Estados - Guia Fiscal / Imposto
+
+state "GERADA_INTERNA" as GERADA_INTERNA
+state "DISPONIVEL_PORTAL" as DISPONIVEL_PORTAL
+state "ENVIADA_CLIENTE" as ENVIADA_CLIENTE
+state "VISUALIZADA_CLIENTE" as VISUALIZADA_CLIENTE
+state "PAGA_NAO_CONFIRMADA" as PAGA_NAO_CONFIRMADA
+state "PAGA" as PAGA
+state "ATRASADA" as ATRASADA
+state "CANCELADA" as CANCELADA
+
+GERADA_INTERNA --> DISPONIVEL_PORTAL : Escritorio publica guia no portal
+DISPONIVEL_PORTAL --> ENVIADA_CLIENTE : Escritorio envia guia ativamente\n(e-mail / WhatsApp / outro canal)
+ENVIADA_CLIENTE --> VISUALIZADA_CLIENTE : Cliente acessa portal e visualiza guia
+
+DISPONIVEL_PORTAL --> PAGA_NAO_CONFIRMADA : Cliente marca como paga\n(sem comprovante ou sem validacao)
+ENVIADA_CLIENTE --> PAGA_NAO_CONFIRMADA : Cliente marca como paga
+VISUALIZADA_CLIENTE --> PAGA_NAO_CONFIRMADA : Cliente marca como paga
+
+PAGA_NAO_CONFIRMADA --> PAGA : Escritorio confirma pagamento\n(ou conciliacao bancaria futura)
+PAGA_NAO_CONFIRMADA --> ATRASADA : Data de vencimento passa\ne escritorio considera nao paga
+
+DISPONIVEL_PORTAL --> ATRASADA : Data de vencimento passa\n(sem pagamento registrado)
+ENVIADA_CLIENTE --> ATRASADA : Data de vencimento passa
+VISUALIZADA_CLIENTE --> ATRASADA : Data de vencimento passa
+
+GERADA_INTERNA --> CANCELADA : Escritorio cancela guia
+DISPONIVEL_PORTAL --> CANCELADA : Escritorio cancela guia
+ENVIADA_CLIENTE --> CANCELADA : Escritorio cancela guia
+ATRASADA --> CANCELADA : Escritorio cancela/substitui guia
+
+@enduml

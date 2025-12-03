@@ -1,0 +1,102 @@
+@startuml
+' C4 - Componentes do Backend (Obrigacoes, Tarefas, Documentos e Guias)
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_LEFT_RIGHT()
+
+title C4 - Componentes - Backend de Aplicacao
+
+' Atores
+Person(escritorio, "Colaborador do Escritorio", "Usuario interno do escritorio contabile.")
+Person(cliente, "Responsavel Financeiro", "Usuario do cliente que acessa o portal.")
+
+' Containers externos
+Container(painel, "App Web - Painel do Escritorio", "Web App", "Frontend interno do escritorio.")
+Container(portal, "App Web - Portal do Cliente", "Web App", "Frontend usado pelo cliente.")
+ContainerDb(db, "Banco de Dados Principal", "BD Relacional", "Dados principais da plataforma.")
+Container(files, "Armazenamento de Arquivos", "Storage", "Arquivos de documentos e guias.")
+Container(notificacaoInterna, "Servico de Notificacoes", "Servico", "Envia emails ou mensagens.")
+Container(logs, "Servico de Logs", "Servico", "Auditoria e historico de acoes.")
+
+' Backend
+Container_Boundary(backend, "Backend de Aplicacao") {
+
+    Component(compEmpresasClientes, "Serv EmpresasClientes", "Dominio", "Cadastro de empresas e contatos.")
+    Component(compDepartamentos, "Serv Departamentos", "Dominio", "Departamentos e responsaveis internos.")
+    Component(compModelosDocs, "Serv ModelosDocs", "Dominio", "Modelos de documentos cobrados.")
+    Component(compColetaDocs, "Serv ColetaDocs", "Dominio", "Solicitacoes e documentos recebidos.")
+    Component(compObrigacoes, "Serv Obrigacoes", "Dominio", "Tipos de obrigacao e configuracoes por empresa.")
+    Component(compGuias, "Serv GuiasFiscais", "Dominio", "Guias de impostos registradas.")
+    Component(compFinanceiroGuias, "Serv FinanceiroGuias", "Dominio", "Situacao financeira das guias.")
+    Component(compTarefas, "Serv Tarefas", "Dominio", "Tarefas internas do escritorio.")
+    Component(compPedidos, "Serv PedidosCliente", "Dominio", "Pedidos e chamados abertos pelo cliente.")
+    Component(compEventosNotificacao, "Serv EventosNotif", "Aplicacao", "Gera eventos de notificacao.")
+    Component(compComunicacaoCliente, "Serv ComunicacaoCliente", "Aplicacao", "Dispara envios para o cliente e grava logs.")
+    Component(compGeracaoPeriodica, "Serv GeracaoPeriodica", "Aplicacao", "Jobs que geram itens recorrentes para cada mes.")
+}
+
+' Relacoes atores -> frontends
+Rel(escritorio, painel, "Usa")
+Rel(cliente, portal, "Usa")
+
+' Painel -> backend
+Rel(painel, compEmpresasClientes, "Gerencia empresas", "HTTPS")
+Rel(painel, compDepartamentos, "Gerencia departamentos", "HTTPS")
+Rel(painel, compModelosDocs, "Configura modelos docs", "HTTPS")
+Rel(painel, compColetaDocs, "Consulta solicitacoes e docs", "HTTPS")
+Rel(painel, compObrigacoes, "Configura obrigacoes", "HTTPS")
+Rel(painel, compGuias, "Gerencia guias fiscais", "HTTPS")
+Rel(painel, compFinanceiroGuias, "Atualiza financeiro guias", "HTTPS")
+Rel(painel, compTarefas, "Gerencia tarefas", "HTTPS")
+Rel(painel, compPedidos, "Gerencia pedidos", "HTTPS")
+Rel(painel, compComunicacaoCliente, "Dispara envios", "HTTPS")
+
+' Portal -> backend
+Rel(portal, compColetaDocs, "Envia documentos", "HTTPS")
+Rel(portal, compGuias, "Visualiza guias", "HTTPS")
+Rel(portal, compFinanceiroGuias, "Consulta financeiro", "HTTPS")
+Rel(portal, compPedidos, "Cria pedidos", "HTTPS")
+
+' Backend -> BD
+Rel(compEmpresasClientes, db, "R/W empresas e contatos", "SQL")
+Rel(compDepartamentos, db, "R/W departamentos", "SQL")
+Rel(compModelosDocs, db, "R/W modelos docs", "SQL")
+Rel(compColetaDocs, db, "R/W solicitacoes e docs", "SQL")
+Rel(compObrigacoes, db, "R/W obrigacoes", "SQL")
+Rel(compGuias, db, "R/W guias fiscais", "SQL")
+Rel(compFinanceiroGuias, db, "R/W dados financeiros", "SQL")
+Rel(compTarefas, db, "R/W tarefas", "SQL")
+Rel(compPedidos, db, "R/W pedidos", "SQL")
+Rel(compComunicacaoCliente, db, "R/W registros de envio", "SQL")
+Rel(compGeracaoPeriodica, db, "Le configuracoes e grava geracoes", "SQL")
+
+' Backend -> Storage
+Rel(compColetaDocs, files, "Salva documentos", "API")
+Rel(compGuias, files, "Salva arquivos de guias", "API")
+
+' Eventos e notificacoes
+Rel(compColetaDocs, compEventosNotificacao, "Eventos de docs", "interno")
+Rel(compObrigacoes, compEventosNotificacao, "Eventos de obrigacoes", "interno")
+Rel(compGuias, compEventosNotificacao, "Eventos de guias", "interno")
+Rel(compFinanceiroGuias, compEventosNotificacao, "Eventos financeiros", "interno")
+Rel(compTarefas, compEventosNotificacao, "Eventos de tarefas", "interno")
+Rel(compPedidos, compEventosNotificacao, "Eventos de pedidos", "interno")
+Rel(compGeracaoPeriodica, compEventosNotificacao, "Eventos de itens gerados", "interno")
+
+Rel(compEventosNotificacao, notificacaoInterna, "Chama servico de notificacao", "interno")
+
+' Comunicacao cliente
+Rel(compComunicacaoCliente, notificacaoInterna, "Usa servico de notificacao", "interno")
+
+' Logs
+Rel(compComunicacaoCliente, logs, "Registra logs de envio", "interno")
+Rel(painel, logs, "Registra acoes internas", "interno")
+Rel(portal, logs, "Registra acoes do cliente", "interno")
+Rel(compColetaDocs, logs, "Registra status de docs", "interno")
+Rel(compGuias, logs, "Registra status de guias", "interno")
+Rel(compFinanceiroGuias, logs, "Registra status financeiro", "interno")
+Rel(compTarefas, logs, "Registra status de tarefas", "interno")
+Rel(compPedidos, logs, "Registra status de pedidos", "interno")
+Rel(compGeracaoPeriodica, logs, "Registra geracoes automaticas", "interno")
+
+@enduml

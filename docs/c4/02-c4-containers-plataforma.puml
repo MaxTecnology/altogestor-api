@@ -1,0 +1,58 @@
+@startuml
+' C4 - Diagrama de Containers da Plataforma
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_TOP_DOWN()
+
+title C4 - Containers - Plataforma de Obrigacoes e Portal do Cliente
+
+' Atores
+Person(escritorio, "Colaborador do Escritorio Contabil", "Usa o painel interno para gerenciar obrigacoes, tarefas e guias.")
+Person(cliente, "Responsavel Financeiro da Empresa Cliente", "Usa o portal do cliente para visualizar guias, controlar situacao financeira e abrir pedidos.")
+Person(admin, "Administrador da Plataforma", "Administra empresas, usuarios, planos e parametros.")
+
+' Sistemas externos
+System_Ext(notificacaoExterna, "Servico de Notificacoes", "E-mail / WhatsApp / SMS.")
+System_Ext(asaas, "ASAAS / Gateway de Pagamento", "Pagamento de guias via boleto/PIX (FUTURO).")
+System_Ext(sefaz, "SEFAZ / DTE / Receita", "Consulta automatica de comunicacoes e guias (FUTURO).")
+System_Ext(prefeituras, "Portais de Prefeituras / ISS", "Obtencao/consulta de guias municipais (FUTURO).")
+
+' Limite do software
+System_Boundary(plataforma, "Plataforma de Obrigacoes e Portal do Cliente") {
+
+    Container(painel, "App Web - Painel do Escritorio", "Aplicacao Web (Browser)", "Interface usada pelos colaboradores do escritorio para gerenciar obrigacoes, tarefas, guias e relacionamento com clientes.")
+    Container(portal, "App Web - Portal do Cliente", "Aplicacao Web (Browser)", "Interface usada pelo cliente para visualizar guias, acompanhar situacao financeira e abrir pedidos ao escritorio.")
+    Container(backend, "Backend de Aplicacao", "API REST/GraphQL", "Centraliza regras de negocio, gestao de obrigacoes, tarefas, clientes, empresas e controle financeiro das guias.")
+    Container(worker, "Servico de Jobs e Tarefas Agendadas", "Worker / Scheduler", "Executa rotinas recorrentes: lembretes de vencimento, atualizacoes de status e processamento de pedidos.")
+    Container(notificacaoInterna, "Servico Interno de Notificacoes", "Servico de Mensageria", "Orquestra o envio de notificacoes com base em eventos do backend e do worker.")
+    ContainerDb(db, "Banco de Dados Principal", "Banco de Dados Relacional", "Armazena empresas, usuarios, obrigacoes, tarefas, guias, pedidos, permissoes e dados de controle financeiro.")
+    Container(files, "Armazenamento de Arquivos", "Storage de Arquivos", "Armazena guias, comprovantes, anexos e documentos relacionados.")
+}
+
+' Atores -> frontends
+Rel(escritorio, painel, "Acessa via navegador")
+Rel(cliente, portal, "Acessa via navegador")
+Rel(admin, painel, "Configura e administra a plataforma")
+
+' Frontends -> backend
+Rel(painel, backend, "Consome APIs para gerenciar obrigacoes, tarefas, guias e clientes", "HTTPS / JSON")
+Rel(portal, backend, "Consome APIs para visualizar guias, situacao financeira e registrar pedidos", "HTTPS / JSON")
+
+' Backend -> infra interna
+Rel(backend, db, "Le e grava dados de dominio", "SQL")
+Rel(backend, files, "Armazena e recupera arquivos de guias e documentos", "API de Storage")
+Rel(backend, notificacaoInterna, "Dispara eventos de notificacao", "Mensagens / HTTP interno")
+
+' Worker
+Rel(worker, db, "Consulta obrigacoes, guias e tarefas para rotinas", "SQL")
+Rel(worker, notificacaoInterna, "Dispara notificacoes com base em rotinas", "Mensagens / HTTP interno")
+
+' Notificacoes externas
+Rel(notificacaoInterna, notificacaoExterna, "Envia e-mail/WhatsApp/SMS para os clientes", "API do provedor")
+
+' Futuro
+Rel(backend, asaas, "Permitir pagamento online de guias via portal (FUTURO)", "API REST")
+Rel(backend, sefaz, "Leitura automatica de comunicacoes/obrigacoes (FUTURO)", "API / Robo")
+Rel(backend, prefeituras, "Baixar/atualizar guias municipais (FUTURO)", "API / Robo")
+
+@enduml

@@ -1,0 +1,185 @@
+@startuml
+' Diagrama de Classes - Modulo de Documentos (Empresa, Usuarios, Logs de Envio)
+
+class Empresa {
+    +id
+    +tipo_cliente                  ' PJ / PF
+    +codigo_interno
+    +nome
+    +cnpj_cpf
+    +cei
+    +inscricao_estadual
+    +inscricao_municipal
+    +regime_tributario
+    +cep
+    +uf
+    +municipio
+    +bairro
+    +endereco
+    +numero
+    +complemento
+    +atividade
+    +ramo_atividade
+    +enviar_email_lembrete_impostos_padrao
+    +ativo
+}
+
+class GrupoCliente {
+    +id
+    +nome
+    +descricao
+    +ativo
+}
+
+class EmpresaGrupoCliente {
+    +id
+    +empresa_id
+    +grupo_cliente_id
+}
+
+class EmpresaCNAE {
+    +id
+    +empresa_id
+    +codigo_cnae
+    +descricao
+    +principal   ' S/N
+}
+
+class Departamento {
+    +id
+    +nome
+    +descricao
+}
+
+class UsuarioEscritorio {
+    +id
+    +nome
+    +email
+    +telefone
+    +cargo
+    +ativo
+}
+
+class UsuarioCliente {
+    +id
+    +nome
+    +email
+    +telefone
+    +cargo
+    +ativo
+}
+
+class EmpresaUsuarioCliente {
+    +id
+    +empresa_id
+    +usuario_cliente_id
+    +perfil_acesso                    ' admin / personalizado
+    +receber_email_lembrete_impostos  ' recebe lembretes de impostos
+}
+
+class EmpresaDepartamentoResponsavel {
+    +id
+    +empresa_id
+    +departamento_id
+    +usuario_escritorio_id   ' responsavel interno
+}
+
+class ModeloDocumento {
+    +id
+    +empresa_id
+    +departamento_id
+    +nome_documento
+    +tipo
+    +periodicidade           ' mensal / trimestral / anual / eventual
+    +dia_limite_envio
+    +critico                 ' S/N
+    +permite_envio_parcial   ' S/N
+    +regra_bloqueio          ' nenhum / aviso / bloquear_servicos / bloquear_balanco
+    +observacoes
+    +ativo
+}
+
+class SolicitacaoDocumento {
+    +id
+    +modelo_documento_id
+    +empresa_id
+    +departamento_id
+    +periodo_referencia
+    +data_limite
+    +status                  ' PENDENTE / PARCIAL / EM_VALIDACAO / INCOMPLETO / RECUSADO / COMPLETO / EM_ATRASO / NAO_ENTREGUE / CANCELADO
+    +data_status
+    +data_conclusao
+    +usuario_responsavel_id  ' UsuarioEscritorio
+}
+
+class DocumentoEnviado {
+    +id
+    +solicitacao_documento_id
+    +usuario_cliente_id
+    +data_envio
+    +nome_arquivo
+    +caminho_arquivo
+    +tipo_arquivo
+    +origem                  ' portal / importacao / integracao
+}
+
+class HistoricoEstadoSolicitacao {
+    +id
+    +solicitacao_documento_id
+    +estado_anterior
+    +estado_novo
+    +data_alteracao
+    +usuario_escritorio_id   ' quem alterou
+    +motivo
+}
+
+' ---- Logs de envio para o cliente (sempre autenticado) ----
+
+class EnvioDocumentoCliente {
+    +id
+    +empresa_id
+    +usuario_escritorio_id
+    +usuario_cliente_id      ' contato que recebeu
+    +tipo_recurso            ' solicitacao_documento / documento_enviado / guia_fiscal / relatorio
+    +recurso_id
+    +canal_envio             ' email / whatsapp / outro
+    +data_envio
+    +assunto
+    +mensagem_resumo
+    +status_envio            ' pendente / enviado / erro
+    +detalhe_status
+}
+
+' -------------------
+' Relacionamentos principais
+' -------------------
+
+Empresa "1" -- "many" ModeloDocumento : possui >
+Empresa "1" -- "many" SolicitacaoDocumento : possui >
+Empresa "1" -- "many" EmpresaDepartamentoResponsavel : tem >
+Empresa "1" -- "many" EmpresaCNAE : possui >
+Empresa "1" -- "many" EmpresaGrupoCliente : pertence >
+Empresa "1" -- "many" EmpresaUsuarioCliente : contatos >
+Empresa "1" -- "many" EnvioDocumentoCliente : envios >
+
+GrupoCliente "1" -- "many" EmpresaGrupoCliente : agrupa >
+
+Departamento "1" -- "many" ModeloDocumento : pertence >
+Departamento "1" -- "many" SolicitacaoDocumento : pertence >
+Departamento "1" -- "many" EmpresaDepartamentoResponsavel : configurado >
+
+ModeloDocumento "1" -- "many" SolicitacaoDocumento : gera >
+
+SolicitacaoDocumento "1" -- "many" DocumentoEnviado : recebe >
+SolicitacaoDocumento "1" -- "many" HistoricoEstadoSolicitacao : historico >
+
+UsuarioEscritorio "1" -- "many" EmpresaDepartamentoResponsavel : responsavel >
+UsuarioEscritorio "1" -- "many" SolicitacaoDocumento : responsavel_pelo_caso >
+UsuarioEscritorio "1" -- "many" HistoricoEstadoSolicitacao : altera_estado >
+UsuarioEscritorio "1" -- "many" EnvioDocumentoCliente : envia >
+
+UsuarioCliente "1" -- "many" EmpresaUsuarioCliente : vinculos_empresas >
+UsuarioCliente "1" -- "many" DocumentoEnviado : envia >
+UsuarioCliente "1" -- "many" EnvioDocumentoCliente : destinatario >
+
+@enduml

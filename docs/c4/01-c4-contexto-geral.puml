@@ -1,0 +1,45 @@
+@startuml
+' C4 - Diagrama de Contexto do Sistema
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_TOP_DOWN()
+
+title C4 - Contexto Geral - Plataforma de Obrigações e Portal do Cliente
+
+' Atores principais
+Person(escritorio, "Colaborador do Escritório Contábil", "Usa o sistema interno para controlar obrigações, tarefas e guias dos clientes.")
+Person(cliente, "Responsável Financeiro da Empresa Cliente", "Acompanha guias, situação financeira e abre pedidos para o escritório.")
+Person(admin, "Administrador da Plataforma", "Administra empresas, usuários, planos e configurações globais.")
+
+System_Boundary(plataforma, "Plataforma de Obrigações & Portal do Cliente") {
+    System(backoffice, "Painel do Escritório", "Sistema interno do escritório para controle de obrigações, tarefas e guias dos clientes.")
+    System(portal, "Portal do Cliente", "Portal web onde o cliente visualiza guias, controla a situação financeira e abre pedidos.")
+}
+
+' Sistemas externos atuais
+System_Ext(notificacao, "Serviço de Notificações", "E-mail / WhatsApp / SMS usados para enviar guias e lembretes de vencimento.")
+
+' Sistemas externos futuros (melhorias)
+System_Ext(sefaz, "SEFAZ / DTE / Receita", "Consulta automática de comunicações e guias fiscais (FUTURO).")
+System_Ext(prefeituras, "Portais de Prefeituras / ISS", "Consulta/obtenção de guias municipais (FUTURO).")
+System_Ext(asaas, "ASAAS / Gateway de Pagamento", "Pagamento de guias via boleto/PIX diretamente no portal (FUTURO).")
+System_Ext(bancos, "Bancos / Conciliação", "Conciliação financeira baseada em extratos bancários (FUTURO).")
+
+' Relações atores -> sistemas
+Rel(escritorio, backoffice, "Gerencia obrigações, tarefas, guias e interação com clientes")
+Rel(cliente, portal, "Visualiza guias, controla situação financeira e abre pedidos ao escritório")
+Rel(admin, backoffice, "Configura empresas, usuários, planos e parâmetros da plataforma")
+
+' Relação entre sistemas internos
+Rel(portal, backoffice, "Sincroniza guias, status de pagamento (real ou declarado) e pedidos de serviço")
+
+' Relações com sistemas externos (atuais)
+Rel(backoffice, notificacao, "Dispara envios de guias, lembretes de vencimento e avisos ao cliente")
+
+' Relações com sistemas externos (futuros)
+Rel(backoffice, sefaz, "Consulta/baixa automatizada de comunicações/obrigações fiscais (FUTURO)")
+Rel(backoffice, prefeituras, "Consulta/baixa automatizada de guias municipais (FUTURO)")
+Rel(portal, asaas, "Permite pagamento online de guias (FUTURO)")
+Rel(portal, bancos, "Consulta movimentos para conciliação (FUTURO)")
+
+@enduml

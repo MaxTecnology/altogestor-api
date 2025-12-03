@@ -1,0 +1,166 @@
+@startuml
+' ER - Modulo de Documentos e Solicitacoes
+
+' =========================
+' Entidades principais
+' =========================
+
+entity "empresas" as empresas {
+  *id : bigint
+  --
+  nome : varchar
+  cnpj_cpf : varchar
+  ativo : bool
+}
+
+entity "departamentos" as departamentos {
+  *id : bigint
+  --
+  nome : varchar
+  descricao : varchar
+}
+
+entity "usuarios_escritorio" as usuarios_escritorio {
+  *id : bigint
+  --
+  nome : varchar
+  email : varchar
+  telefone : varchar
+  cargo : varchar
+  ativo : bool
+}
+
+entity "usuarios_cliente" as usuarios_cliente {
+  *id : bigint
+  --
+  nome : varchar
+  email : varchar
+  telefone : varchar
+  cargo : varchar
+  ativo : bool
+}
+
+entity "empresa_usuario_cliente" as empresa_usuario_cliente {
+  *id : bigint
+  --
+  empresa_id : bigint
+  usuario_cliente_id : bigint
+  perfil_acesso : varchar
+  receber_email_lembrete_impostos : bool
+}
+
+entity "empresa_departamento_responsavel" as empresa_departamento_responsavel {
+  *id : bigint
+  --
+  empresa_id : bigint
+  departamento_id : bigint
+  usuario_escritorio_id : bigint
+}
+
+' =========================
+' Documentos e solicitacoes
+' =========================
+
+entity "modelos_documentos" as modelos_documentos {
+  *id : bigint
+  --
+  empresa_id : bigint
+  departamento_id : bigint
+  nome_documento : varchar
+  tipo : varchar
+  periodicidade : varchar
+  dia_limite_envio : int
+  critico : bool
+  permite_envio_parcial : bool
+  regra_bloqueio : varchar
+  ativo : bool
+}
+
+entity "solicitacoes_documentos" as solicitacoes_documentos {
+  *id : bigint
+  --
+  modelo_documento_id : bigint
+  empresa_id : bigint
+  departamento_id : bigint
+  periodo_referencia : varchar
+  data_limite : datetime
+  status : varchar
+  data_status : datetime
+  data_conclusao : datetime
+  usuario_responsavel_id : bigint   ' usuarios_escritorio
+}
+
+entity "documentos_enviados" as documentos_enviados {
+  *id : bigint
+  --
+  solicitacao_documento_id : bigint
+  usuario_cliente_id : bigint
+  data_envio : datetime
+  nome_arquivo : varchar
+  caminho_arquivo : varchar
+  tipo_arquivo : varchar
+  origem : varchar
+}
+
+entity "historico_estado_solicitacao" as historico_estado_solicitacao {
+  *id : bigint
+  --
+  solicitacao_documento_id : bigint
+  estado_anterior : varchar
+  estado_novo : varchar
+  data_alteracao : datetime
+  usuario_escritorio_id : bigint
+  motivo : text
+}
+
+entity "envios_documento_cliente" as envios_documento_cliente {
+  *id : bigint
+  --
+  empresa_id : bigint
+  usuario_escritorio_id : bigint
+  usuario_cliente_id : bigint
+  tipo_recurso : varchar      ' ex: solicitacao_documento, documento_enviado, guia_fiscal
+  recurso_id : bigint
+  canal_envio : varchar       ' email, whatsapp, etc.
+  data_envio : datetime
+  assunto : varchar
+  mensagem_resumo : text
+  status_envio : varchar      ' pendente, enviado, erro
+  detalhe_status : text
+}
+
+' =========================
+' Relacionamentos
+' =========================
+
+' Empresas e usuarios
+empresas ||--o{ empresa_usuario_cliente : "1 N"
+usuarios_cliente ||--o{ empresa_usuario_cliente : "1 N"
+
+empresas ||--o{ empresa_departamento_responsavel : "1 N"
+departamentos ||--o{ empresa_departamento_responsavel : "1 N"
+usuarios_escritorio ||--o{ empresa_departamento_responsavel : "1 N"
+
+' Modelos e solicitacoes
+empresas ||--o{ modelos_documentos : "1 N"
+departamentos ||--o{ modelos_documentos : "1 N"
+
+modelos_documentos ||--o{ solicitacoes_documentos : "1 N"
+empresas ||--o{ solicitacoes_documentos : "1 N"
+departamentos ||--o{ solicitacoes_documentos : "1 N"
+usuarios_escritorio ||--o{ solicitacoes_documentos : "responsavel"
+
+' Documentos enviados
+solicitacoes_documentos ||--o{ documentos_enviados : "1 N"
+usuarios_cliente ||--o{ documentos_enviados : "1 N"
+
+' Historico de estados
+solicitacoes_documentos ||--o{ historico_estado_solicitacao : "1 N"
+usuarios_escritorio ||--o{ historico_estado_solicitacao : "1 N"
+
+' Envios ao cliente
+empresas ||--o{ envios_documento_cliente : "1 N"
+usuarios_escritorio ||--o{ envios_documento_cliente : "1 N"
+usuarios_cliente ||--o{ envios_documento_cliente : "1 N"
+
+@enduml

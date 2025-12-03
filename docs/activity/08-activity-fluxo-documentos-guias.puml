@@ -1,0 +1,73 @@
+@startuml
+' Activity - Fluxo completo: Documentos -> Guia -> Pagamento
+
+start
+
+:'Escritorio configura modelos de documentos\npor empresa e departamento';
+:'Sistema gera solicitacoes de documentos\npara o periodo (ex: mes atual)';
+
+if ("Cliente recebe solicitacoes\nno portal" ) then (Sim)
+    :'Cliente acessa portal\nlista solicitacoes pendentes';
+
+    repeat
+        :'Cliente envia documentos\n(XML, relatorios, etc.)';
+        :'Sistema registra DocumentoEnviado\nvinculado a SolicitacaoDocumento';
+
+        if ("Ha mais documentos\npara este periodo?" ) then (Sim)
+            :'Cliente continua envio\n(parcial)';
+        else (Nao)
+        endif
+    repeat while ("Cliente decidiu enviar\nmais arquivos?") is (Sim)
+
+    :'SolicitacaoDocumento muda para\nPARCIAL ou EM_VALIDACAO\nconforme regra';
+
+    :'Responsavel do escritorio\nvalida documentos recebidos';
+
+    if ("Documentos corretos\npara apuracao?" ) then (Sim)
+        :'SolicitacaoDocumento muda para COMPLETO';
+    else (Nao)
+        :'SolicitacaoDocumento muda para\nINCOMPLETO ou RECUSADO';
+        :'Sistema notifica cliente sobre\nproblemas nos documentos';
+        :'Cliente deve reenviar documentos\ncorretos (novo ciclo PARCIAL -> VALIDACAO)';
+    endif
+
+else (Nao)
+    :'Sistema dispara lembretes\n(EnvioDocumentoCliente via email/WhatsApp)';
+    if ("Cliente continua sem enviar?" ) then (Sim)
+        :'Ao vencer prazo, SolicitacaoDocumento\nmuda para EM_ATRASO';
+        :'Escritorio pode criar tarefas internas\npara cobranca de documentos';
+    else (Nao)
+        :'Cliente acessa portal e envia documentos\n(continua fluxo acima)';
+    endif
+endif
+
+'--- Apuracao externa e cadastro de guia ---'
+:'Escritorio realiza apuracao do imposto\n(fora do sistema ou em outro sistema)';
+:'Escritorio cadastra GuiaFiscal no sistema\n(competencia, vencimento, valor, etc.)';
+:'GuiaFiscal entra como GERADA_INTERNA';
+
+:'Escritorio publica guia no portal\n(GuiaFiscal -> DISPONIVEL_PORTAL)';
+:'Escritorio dispara envio ativo de guia\n(EnvioDocumentoCliente: email/WhatsApp)';
+:'GuiaFiscal muda para ENVIADA_CLIENTE';
+
+:'Cliente acessa portal e visualiza guia\n(GuiaFiscal pode ir para VISUALIZADA_CLIENTE)';
+
+if ("Cliente paga a guia?" ) then (Sim)
+    :'Cliente registra pagamento no portal\n(opcionalmente anexa ComprovantePagamento)';
+    :'GuiaFiscal muda para PAGA_NAO_CONFIRMADA';
+
+    :'Responsavel do escritorio confere\npagamento (extrato/retorno)';
+    if ("Pagamento confirmado?" ) then (Sim)
+        :'GuiaFiscal muda para PAGA';
+        :'Servico Financeiro das Guias\natualiza status financeiro concluido';
+    else (Nao)
+        :'GuiaFiscal permanece como PAGA_NAO_CONFIRMADA\nou volta a ATRASADA se vencimento passou';
+    endif
+
+else (Nao)
+    :'Ao vencer prazo sem pagamento\nGuiaFiscal muda para ATRASADA';
+    :'Sistema registra atraso e pode\ncriar tarefas internas e notificacoes';
+endif
+
+stop
+@enduml

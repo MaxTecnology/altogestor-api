@@ -1,0 +1,53 @@
+@startuml
+' Sequencia - Envio de Guia Fiscal para o Cliente
+
+actor Colaborador as escritorio
+participant "Painel Escritorio" as painel
+participant "Serv GuiasFiscais" as compGuias
+participant "Serv FinanceiroGuias" as compFinGuias
+participant "Serv ComunicacaoCliente" as compComCli
+participant "Servico Notificacoes" as notif
+database "BD Principal" as db
+participant "Servico Logs" as logs
+
+escritorio -> painel : Abrir tela de guia\n(empresa, competencia)
+painel -> compGuias : GET /guias/{id}
+compGuias -> db : SELECT guia_fiscal
+db --> compGuias : dados guia
+compGuias --> painel : dados guia
+
+== Publicar guia no portal ==
+escritorio -> painel : Acao "Publicar guia"
+panel -> compGuias : POST /guias/{id}/publicar
+compGuias -> db : UPDATE guia_fiscal\nstatus = DISPONIVEL_PORTAL
+compGuias -> logs : registrar "guia publicada no portal"
+compGuias --> painel : OK
+
+== Enviar guia ativamente ao cliente ==
+escritorio -> painel : Acao "Enviar ao cliente"
+panel -> compComCli : POST /envios/guia\n(guia_id, contatos, canal)
+
+compComCli -> compGuias : GET /guias/{id}
+compGuias -> db : SELECT guia_fiscal
+db --> compGuias : dados guia
+compGuias --> compComCli : dados guia
+
+compComCli -> db : INSERT envio_documento_cliente\n(tipo_recurso = guia_fiscal,\nrecurso_id = guia_id,\nstatus_envio = pendente)
+db --> compComCli : id_envio
+
+compComCli -> notif : Enviar mensagem\n(email/whatsapp) com link para portal
+notif --> compComCli : status envio (sucesso/erro)
+
+compComCli -> db : UPDATE envio_documento_cliente\nstatus_envio = sucesso/erro
+compComCli -> logs : registrar log de envio\n(quem enviou, quando, canal, resultado)
+
+compComCli --> painel : retorno OK/erro
+
+== Atualizar status financeiro opcional ==
+escritorio -> painel : Opcional: marcar como\n"aguardando pagamento"
+panel -> compFinGuias : POST /guias/{id}/status\n(A_PAGAR)
+compFinGuias -> db : UPDATE financeiro_guia
+compFinGuias -> logs : registrar mudanca status financeiro
+compFinGuias --> painel : OK
+
+@enduml

@@ -1,0 +1,125 @@
+@startuml
+' ER - Modulo de Obrigacoes e Guias Fiscais
+
+' Entidades basicas reutilizadas
+
+entity "empresas" as empresas {
+  *id : bigint
+  --
+  nome : varchar
+  cnpj_cpf : varchar
+  ativo : bool
+}
+
+entity "departamentos" as departamentos {
+  *id : bigint
+  --
+  nome : varchar
+  descricao : varchar
+}
+
+entity "usuarios_escritorio" as usuarios_escritorio {
+  *id : bigint
+  --
+  nome : varchar
+  email : varchar
+  telefone : varchar
+  cargo : varchar
+  ativo : bool
+}
+
+' Opcional: se quiser vincular guias a solicitacoes de documentos
+entity "solicitacoes_documentos" as solicitacoes_documentos {
+  *id : bigint
+  --
+  empresa_id : bigint
+  periodo_referencia : varchar
+}
+
+' =========================
+' Obrigacoes
+' =========================
+
+entity "tipos_obrigacoes" as tipos_obrigacoes {
+  *id : bigint
+  --
+  nome : varchar
+  descricao : varchar
+  departamento_id : bigint
+  tipo_imposto : varchar
+  periodicidade : varchar    ' mensal, trimestral, anual, eventual
+  ativo : bool
+}
+
+entity "configuracoes_obrigacao_empresa" as configuracoes_obrigacao_empresa {
+  *id : bigint
+  --
+  empresa_id : bigint
+  tipo_obrigacao_id : bigint
+  dia_limite_padrao : int
+  responsavel_departamento_id : bigint   ' usuarios_escritorio
+  gera_guia_no_sistema : bool
+  observacoes : text
+  ativo : bool
+}
+
+' =========================
+' Guias fiscais
+' =========================
+
+entity "guias_fiscais" as guias_fiscais {
+  *id : bigint
+  --
+  empresa_id : bigint
+  tipo_obrigacao_id : bigint
+  competencia : varchar       ' ex: 2025-10
+  data_vencimento : datetime
+  valor_principal : decimal(15,2)
+  valor_juros : decimal(15,2)
+  valor_multa : decimal(15,2)
+  valor_total : decimal(15,2)
+  status_guia : varchar       ' GERADA_INTERNA, ENVIADA_CLIENTE, PAGA, ATRASADA, etc.
+  data_status : datetime
+  usuario_responsavel_id : bigint    ' usuarios_escritorio
+  observacoes : text
+}
+
+entity "comprovantes_pagamento" as comprovantes_pagamento {
+  *id : bigint
+  --
+  guia_fiscal_id : bigint
+  usuario_cliente_id : bigint
+  data_envio : datetime
+  nome_arquivo : varchar
+  caminho_arquivo : varchar
+  observacoes : text
+}
+
+entity "vinculos_guia_solicitacao_documento" as vinculos_guia_solicitacao_documento {
+  *id : bigint
+  --
+  guia_fiscal_id : bigint
+  solicitacao_documento_id : bigint
+  tipo_vinculo : varchar   ' base_apuracao, suporte, outro
+}
+
+' =========================
+' Relacionamentos
+' =========================
+
+departamentos ||--o{ tipos_obrigacoes : "1 N"
+
+empresas ||--o{ configuracoes_obrigacao_empresa : "1 N"
+tipos_obrigacoes ||--o{ configuracoes_obrigacao_empresa : "1 N"
+usuarios_escritorio ||--o{ configuracoes_obrigacao_empresa : "responsavel"
+
+empresas ||--o{ guias_fiscais : "1 N"
+tipos_obrigacoes ||--o{ guias_fiscais : "1 N"
+usuarios_escritorio ||--o{ guias_fiscais : "responsavel"
+
+guias_fiscais ||--o{ comprovantes_pagamento : "1 N"
+
+guias_fiscais ||--o{ vinculos_guia_solicitacao_documento : "1 N"
+solicitacoes_documentos ||--o{ vinculos_guia_solicitacao_documento : "1 N"
+
+@enduml

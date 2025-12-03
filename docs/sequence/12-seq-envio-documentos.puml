@@ -1,0 +1,48 @@
+@startuml
+' Sequencia - Cliente envia documentos para SolicitacaoDocumento
+
+actor Cliente as cliente
+participant "Portal do Cliente" as portal
+participant "Serv ColetaDocs" as compColetaDocs
+database "BD Principal" as db
+participant "Storage Arquivos" as files
+participant "Serv EventosNotif" as compEventosNotif
+participant "Servico Notificacoes" as notif
+participant "Servico Logs" as logs
+
+== Cliente acessa solicitacoes ==
+cliente -> portal : Acessar lista de solicitacoes\n(empresa, periodo)
+portal -> compColetaDocs : GET /solicitacoes?empresa&periodo
+compColetaDocs -> db : SELECT solicitacoes_documento
+db --> compColetaDocs : lista solicitacoes
+compColetaDocs --> portal : lista com status atual
+
+cliente -> portal : Abrir solicitacao especifica
+portal -> compColetaDocs : GET /solicitacoes/{id}
+compColetaDocs -> db : SELECT solicitacao_documento\n+ documentos_enviados
+db --> compColetaDocs : dados
+compColetaDocs --> portal : detalhes + uploads existentes
+
+== Envio de novo documento ==
+cliente -> portal : Escolher arquivo e clicar "enviar"
+portal -> files : upload arquivo
+files --> portal : URL / caminho_arquivo
+
+portal -> compColetaDocs : POST /solicitacoes/{id}/documentos\n(meta + caminho_arquivo)
+compColetaDocs -> db : INSERT documento_enviado
+db --> compColetaDocs : id_documento
+
+' Atualiza status da solicitacao
+compColetaDocs -> db : UPDATE solicitacao_documento\n(status = PARCIAL ou EM_VALIDACAO)
+compColetaDocs -> logs : registrar envio de documento\n(usuario_cliente, solicitacao, arquivo)
+
+' Dispara eventos para notificacao interna
+compColetaDocs -> compEventosNotif : evento "documento_recebido"
+compEventosNotif -> notif : enviar aviso para responsavel\ninterno (email ou outro canal)
+
+compColetaDocs --> portal : retorno OK\n(novo status e lista de docs)
+
+== Opcional: Escritorio valida depois ==
+... validacao ocorre em outro fluxo\n(EM_VALIDACAO -> COMPLETO/INCOMPLETO/RECUSADO) ...
+
+@enduml
