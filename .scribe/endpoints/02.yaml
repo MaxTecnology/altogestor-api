@@ -1,0 +1,450 @@
+name: Documentos
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/documentos/modelos
+    metadata:
+      custom: []
+      groupName: Documentos
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Lista modelos de documento do tenant.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      X-Tenant-ID: 'string required Public ID do tenant.'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 500
+        content: |-
+          {
+              "message": "Server Error"
+          }
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:3000'
+          access-control-allow-credentials: 'true'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/documentos/modelos
+    metadata:
+      custom: []
+      groupName: Documentos
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Cria modelo de documento.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      X-Tenant-ID: 'string required Public ID do tenant.'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      nome:
+        custom: []
+        name: nome
+        description: 'Nome do modelo de documento. Must not be greater than 255 characters.'
+        required: true
+        example: 'XML de saída'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      descricao:
+        custom: []
+        name: descricao
+        description: 'Descrição do modelo. Must not be greater than 500 characters.'
+        required: false
+        example: 'XML mensal de notas emitidas'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      departamento:
+        custom: []
+        name: departamento
+        description: 'Departamento responsável. Must not be greater than 100 characters.'
+        required: false
+        example: fiscal
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      periodicidade:
+        custom: []
+        name: periodicidade
+        description: 'Periodicidade (mensal, anual, único). Must not be greater than 50 characters.'
+        required: false
+        example: mensal
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      obrigatorio:
+        custom: []
+        name: obrigatorio
+        description: 'Se é obrigatório.'
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      exige_periodo:
+        custom: []
+        name: exige_periodo
+        description: 'Se exige competência/período.'
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      nome: 'XML de saída'
+      descricao: 'XML mensal de notas emitidas'
+      departamento: fiscal
+      periodicidade: mensal
+      obrigatorio: false
+      exige_periodo: false
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/documentos/solicitacoes
+    metadata:
+      custom: []
+      groupName: Documentos
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Lista solicitações de documentos do usuário (por empresas vinculadas).'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      X-Tenant-ID: 'string required Public ID do tenant.'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      empresa_id:
+        custom: []
+        name: empresa_id
+        description: 'Filtrar por empresa_id. Opcional.'
+        required: false
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      status:
+        custom: []
+        name: status
+        description: 'Filtrar por status. Opcional.'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      empresa_id: 16
+      status: architecto
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 500
+        content: |-
+          {
+              "message": "Server Error"
+          }
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:3000'
+          access-control-allow-credentials: 'true'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/documentos/solicitacoes
+    metadata:
+      custom: []
+      groupName: Documentos
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Cria uma solicitação de documento para uma empresa.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      X-Tenant-ID: 'string required Public ID do tenant.'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      empresa_id:
+        custom: []
+        name: empresa_id
+        description: 'ID interno da empresa (ou public_id).'
+        required: true
+        example: 1
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      modelo_documento_id:
+        custom: []
+        name: modelo_documento_id
+        description: 'ID interno do modelo de documento (ou public_id).'
+        required: true
+        example: 1
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      competencia:
+        custom: []
+        name: competencia
+        description: 'Competência no formato YYYY-MM. Must not be greater than 20 characters.'
+        required: false
+        example: 2025-10
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      observacao:
+        custom: []
+        name: observacao
+        description: 'Observações adicionais. Must not be greater than 1000 characters.'
+        required: false
+        example: 'Favor enviar até dia 10.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      empresa_id: 1
+      modelo_documento_id: 1
+      competencia: 2025-10
+      observacao: 'Favor enviar até dia 10.'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/documentos/solicitacoes/{id}'
+    metadata:
+      custom: []
+      groupName: Documentos
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Detalhe de uma solicitação.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      X-Tenant-ID: 'string required Public ID do tenant.'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the solicitaco.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 500
+        content: |-
+          {
+              "message": "Server Error"
+          }
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:3000'
+          access-control-allow-credentials: 'true'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/documentos/solicitacoes/{id}/upload'
+    metadata:
+      custom: []
+      groupName: Documentos
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Upload de documento para uma solicitação.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      X-Tenant-ID: 'string required Public ID do tenant.'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the solicitaco.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      arquivo:
+        custom: []
+        name: arquivo
+        description: 'Arquivo a ser enviado. Must be a file. Must not be greater than 51200 kilobytes.'
+        required: true
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      observacao:
+        custom: []
+        name: observacao
+        description: 'Observação opcional. Must not be greater than 1000 characters.'
+        required: false
+        example: 'Envio do mês de outubro.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      observacao: 'Envio do mês de outubro.'
+    fileParameters:
+      arquivo: null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
