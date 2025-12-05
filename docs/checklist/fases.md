@@ -21,6 +21,7 @@ Fluxo: ao final de cada fase, você valida manualmente e eu preparo/rodo testes 
 ## Fase 3 – Domínio inicial (API + UI Livewire)
 - [x] Documentos: migrations/models para modelos, solicitações, documentos, histórico + endpoints (modelos, solicitações, upload).
 - [x] Obrigações/Guias: migrations/models (tipos, configs por empresa, guias, comprovantes, histórico).
+- [x] UI inicial Documentos: páginas de Modelos (CRUD simples) e Solicitações (listagem + criação) consumindo APIs com tenant header.
 - [ ] Workflow/Tarefas: modelos, tarefas, histórico + telas (lista/atualização de status).
 - [ ] Forms/Pedidos: modelos, campos, pedidos, respostas, anexos + telas de abertura/acompanhar.
 - [ ] Notificações: templates, fila, logs + UI de envio/listagem.
@@ -32,6 +33,8 @@ Fluxo: ao final de cada fase, você valida manualmente e eu preparo/rodo testes 
 - [ ] Backups e proteção de Horizon/Mailpit/MinIO em prod.
 
 ## Fase 5 – Frontend + UX núcleo (refino)
+- [x] Layout base Blade/Livewire (login, app dashboard, logo integrado).
+- [x] Shell de navegação do painel (menu para dashboard, modelos, solicitações, swagger; logout; tenant visível).
 - [ ] Layout base Blade/Livewire refinado (painel/portal) com troca de empresa.
 - [ ] UX/estados/feedbacks e componentes do design system consolidados.
 - [ ] Policies refletidas na UI (ocultação/disable por permissão).

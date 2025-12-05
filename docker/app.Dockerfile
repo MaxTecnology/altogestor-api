@@ -3,12 +3,15 @@ FROM php:8.4-fpm
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
+    curl \
     libpq-dev \
     libzip-dev \
     libonig-dev \
     libicu-dev \
     zip \
     vim \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
     && docker-php-ext-install pdo pdo_pgsql mbstring zip intl bcmath \
     && pecl install redis \
     && docker-php-ext-enable redis \

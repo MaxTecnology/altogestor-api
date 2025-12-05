@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 1250 1250" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g id="Página-1" serif:id="Página 1" transform="matrix(2.5,0,0,2.5,0,0)">
+        <rect x="0" y="0" width="500" height="500" style="fill:none;"/>
+        <g id="BACKGROUND">
+            <rect x="0" y="0" width="500" height="500" style="fill:rgb(237,237,237);"/>
+        </g>
+        <g id="OBJECTS" transform="matrix(1.666667,0,0,1.666667,-165.998217,-153.743316)">
+            <g transform="matrix(1,0,0,1,272.23563,295.940938)">
+                <path d="M0,-136.231L-20.161,-83.811L-9.739,-56.835L-30.536,-56.835L-43.263,-23.746L2.913,-23.746L12.061,0L59.554,0L0,-136.231Z" style="fill:rgb(0,55,123);fill-rule:nonzero;"/>
+            </g>
+            <g transform="matrix(-66.753059,174.863922,174.863922,66.753059,264.544681,113.646721)">
+                <path d="M-0.05,0.016L0.265,-0.159L0.241,-0.096L1.095,-0.137L1.006,0.096L0.166,0.098L0.143,0.159L-0.05,0.016Z" style="fill:url(#_Linear1);fill-rule:nonzero;"/>
+            </g>
+            <g transform="matrix(1,0,0,1,-0.40107,9.705438)">
+                <g transform="matrix(0.24,-0,0,0.24,-23.286704,-9.594143)">
+                    <g transform="matrix(58.333333,0,0,58.333333,1720.803162,1504.017288)">
+                    </g>
+                    <text x="556.586px" y="1504.017px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:58.333px;fill:rgb(86,161,243);">T<tspan x="585.753px 618.195px " y="1504.017px 1504.017px ">ec</tspan>nologia que impulsiona grandes negócios</text>
+                </g>
+                <g transform="matrix(0.24,0,0,0.24,80.10843,219.362563)">
+                    <g transform="matrix(196.134583,0,0,196.134583,1277.075978,466.480695)">
+                    </g>
+                    <text x="138.687px" y="466.481px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:196.135px;fill:rgb(0,55,123);">A<tspan x="293.043px 360.154px 438.183px 570.8px 746.896px 879.513px 1001.116px 1079.145px 1211.762px " y="466.481px 466.481px 466.481px 466.481px 466.481px 466.481px 466.481px 466.481px 466.481px ">ltoGestor</tspan></text>
+                </g>
+            </g>
+        </g>
+    </g>
+    <defs>
+        <linearGradient id="_Linear1" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1,0,0,-1,0,-0.000002)"><stop offset="0" style="stop-color:rgb(0,55,123);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(93,168,252);stop-opacity:1"/></linearGradient>
+    </defs>
+</svg>

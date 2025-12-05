@@ -20,6 +20,10 @@ class DevSeeder extends Seeder
             ['slug' => 'altogestor-demo'],
             ['nome' => 'AltoGestor Demo Contabilidade']
         );
+        if (! $tenant->public_id) {
+            $tenant->public_id = (string) \Symfony\Component\Uid\UuidV7::generate();
+            $tenant->save();
+        }
 
         app(TenantManager::class)->setTenantId($tenant->id);
 
@@ -37,7 +41,7 @@ class DevSeeder extends Seeder
         ];
 
         /** @var User $user */
-        $user = User::query()->firstOrCreate(
+        $user = User::query()->updateOrCreate(
             [
                 'tenant_id' => $tenant->id,
                 'email' => 'socio@demo.local',

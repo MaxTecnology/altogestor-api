@@ -154,7 +154,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: December 4, 2025</li>
+        <li>Last updated: December 5, 2025</li>
     </ul>
 </div>
 
@@ -381,7 +381,6 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
     "http://localhost:8080/api/login" \
-    --header "X-Tenant-ID: string required Public ID do tenant. Exemplo: 019aea83-a7be-7d5a-8106-710b80fc9a49" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -397,7 +396,6 @@ You can check the Dev Tools console for debugging information.</code></pre>
 );
 
 const headers = {
-    "X-Tenant-ID": "string required Public ID do tenant. Exemplo: 019aea83-a7be-7d5a-8106-710b80fc9a49",
     "Content-Type": "application/json",
     "Accept": "application/json",
 };
@@ -464,18 +462,6 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <b><code>api/login</code></b>
         </p>
                 <h4 class="fancy-heading-panel"><b>Headers</b></h4>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>X-Tenant-ID</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="X-Tenant-ID"                data-endpoint="POSTapi-login"
-               value="string required Public ID do tenant. Exemplo: 019aea83-a7be-7d5a-8106-710b80fc9a49"
-               data-component="header">
-    <br>
-<p>Example: <code>string required Public ID do tenant. Exemplo: 019aea83-a7be-7d5a-8106-710b80fc9a49</code></p>
-            </div>
                                 <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
 &nbsp;
@@ -1643,7 +1629,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
     --form "observacao=Envio do mês de outubro."\
-    --form "arquivo=@/tmp/phpc7f9n8jnqu5f2oFe034" </code></pre></div>
+    --form "arquivo=@/tmp/php5a4tib28jl18bUqHyqQ" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -1791,7 +1777,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>Arquivo a ser enviado. Must be a file. Must not be greater than 51200 kilobytes. Example: <code>/tmp/phpc7f9n8jnqu5f2oFe034</code></p>
+<p>Arquivo a ser enviado. Must be a file. Must not be greater than 51200 kilobytes. Example: <code>/tmp/php5a4tib28jl18bUqHyqQ</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>observacao</code></b>&nbsp;&nbsp;

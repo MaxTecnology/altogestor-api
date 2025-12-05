@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Support\Tenancy\TenantManager;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -18,34 +18,57 @@ class AuthenticatedSessionController extends Controller
      *
      * @unauthenticated
      * @group Auth
-     * @header X-Tenant-ID string required Public ID do tenant. Exemplo: 019aea83-a7be-7d5a-8106-710b80fc9a49
      * @bodyParam email string required Example: socio@demo.local
      * @bodyParam password string required Example: password
      */
-    public function store(LoginRequest $request): Response
+    public function store(LoginRequest $request): JsonResponse
     {
-        $tenantId = app(TenantManager::class)->getTenantId();
-        if ($tenantId === null) {
-            throw new HttpException(400, 'tenant_required');
-        }
-
         $credentials = $request->only(['email', 'password']);
+        $tenantManager = app(TenantManager::class);
+        $tenantId = $tenantManager->getTenantId();
+        $tenantPublicId = $tenantManager->getTenantPublicId();
+        $user = null;
 
-        $user = $request->user()
-            ?? Auth::getProvider()->retrieveByCredentials([
+        if ($tenantId !== null) {
+            $user = Auth::getProvider()->retrieveByCredentials([
                 ...$credentials,
                 'tenant_id' => $tenantId,
             ]);
+        } else {
+            $users = \App\Models\User::query()->where('email', $credentials['email'])->get();
+            if ($users->isEmpty()) {
+                abort(401, 'invalid_credentials');
+            }
+            if ($users->count() > 1) {
+                throw new HttpException(400, 'tenant_required');
+            }
+            $user = $users->first();
+            $tenantId = (int) $user->tenant_id;
+            $tenantManager->setTenantId($tenantId);
+            $tenantPublicId = optional($user->tenant)->public_id;
+            if ($tenantPublicId) {
+                $tenantManager->setTenantPublicId($tenantPublicId);
+            }
+        }
 
-        if (! $user || (int) $user->tenant_id !== $tenantId || ! Hash::check($credentials['password'], $user->getAuthPassword())) {
+        if (! $user || ! Hash::check($credentials['password'], $user->getAuthPassword())) {
             abort(401, 'invalid_credentials');
         }
 
-        app(TenantManager::class)->setTenantId((int) $user->tenant_id);
+        $tenantManager->setTenantId($tenantId);
+        if (! $tenantPublicId && $user->relationLoaded('tenant') === false) {
+            $user->load('tenant');
+            $tenantPublicId = optional($user->tenant)->public_id;
+        }
 
         $token = $user->createToken('api', ['tenant_id' => $tenantId])->plainTextToken;
 
-        return response($token, 200);
+        return response()->json([
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'tenant_id' => $tenantId,
+            'tenant_public_id' => $tenantPublicId,
+        ], 200);
     }
 
     /**
@@ -53,7 +76,7 @@ class AuthenticatedSessionController extends Controller
      *
      * @group Auth
      */
-    public function destroy(Request $request): Response
+    public function destroy(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()?->delete();
         Auth::guard('web')->logout();

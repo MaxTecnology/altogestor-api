@@ -99,7 +99,6 @@ endpoints:
       authenticated: false
       deprecated: false
     headers:
-      X-Tenant-ID: 'string required Public ID do tenant. Exemplo: 019aea83-a7be-7d5a-8106-710b80fc9a49'
       Content-Type: application/json
       Accept: application/json
     urlParameters: []
